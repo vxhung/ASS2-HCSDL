@@ -1,0 +1,177 @@
+CREATE TABLE SANPHAM
+(
+	IMEI		varchar(10) NOT NULL,
+	Serial		varchar(10) NOT NULL,
+	NgaySX		date,
+	XuatXu		varchar(20),
+	PRIMARY KEY (IMEI,Serial)
+);
+
+CREATE TABLE HOADON
+(
+	Ma_HD			int PRIMARY KEY CLUSTERED NOT NULL,
+	NgayXuat		date,
+	Ma_KH			varchar(10),
+	Ma_NV_ban_hang	varchar(10)
+);
+CREATE TABLE	YEUCAUTRONG
+(
+	IMEI		varchar(10),
+	Serial		varchar(10),
+	Ma_HD		int,
+	PRIMARY KEY(IMEI,Serial,Ma_HD)
+);
+
+CREATE TABLE	BAN
+(
+	Ma_CH	int  NOT NULL,
+	Serial	varchar(10) NOT NULL,
+	PRIMARY KEY	(Ma_CH, Serial)
+);
+
+CREATE TABLE TRUSOCHINH
+(
+	Ten_TSC		varchar(15)  NOT NULL PRIMARY KEY CLUSTERED,
+	Hotline		char(8)   NOT NULL,
+ 	Diachi		varchar(15) 
+ );
+ CREATE TABLE CUAHANG
+(
+	Ma_CH			int	PRIMARY KEY CLUSTERED,
+	Ten_CH			varchar(15)   NOT NULL ,
+	Sdt				varchar(8)      NOT NULL,
+	Diachi			varchar(15)   ,
+	Ma_NV_quan_ly	varchar(10),
+	Ten_TSC			varchar(15)	NOT NULL
+);
+CREATE TABLE MATHANG
+(
+	Serial		varchar(10)  NOT NULL  PRIMARY KEY CLUSTERED,
+	Ten_MH		varchar(15) ,
+	Soluong		int,
+	Gia_niem	int	NOT NULL,
+	Gia_ban		int	NOT NULL,
+	Thue		varchar(4)
+);
+CREATE TABLE KHO
+(
+	Ma_Kho		int    NOT NULL PRIMARY KEY ,
+	Ten_Kho		varchar(15),
+	Diachi		varchar(15)
+);
+
+CREATE TABLE NHACUNGCAP
+(
+	Ma_NCC		varchar(10)    NOT NULL PRIMARY KEY,
+	Ten_NCC		varchar(15)   ,
+	Diachi		varchar(15),
+	Email		varchar(15)
+);
+CREATE TABLE TICHDIEM
+(
+	Ma_KH			varchar(10)    NOT NULL,
+	Ma_HD			int     NOT NULL,
+	Sodiemtichduoc  int,
+	PRIMARY KEY (Ma_KH,Ma_HD)
+);
+
+CREATE TABLE PHIEUKHO
+(
+	Ma_PK			varchar(10)			PRIMARY KEY CLUSTERED		NOT NULL,
+	IMEI			varchar(10)			NOT NULL,
+	Serial			varchar(10)			NOT NULL,
+	Ma_Kho			int				NOT NULL,
+	Ma_NV_thu_kho	varchar(10)		NOT NULL,
+	Ma_NV_ban_hang	varchar(10)		NULL,
+	Ma_NCC			varchar(10),
+	Loai_phieu		varchar(10)	NOT NULL
+);
+
+CREATE TABLE KHACHHANG
+(
+	Ma_KH			varchar(10) PRIMARY KEY CLUSTERED NOT NULL,
+	Ten_KH			varchar(30) NOT NULL,
+	Sdt				varchar(8),
+	Loai			varchar(10) NOT NULL,
+	So_diem			int
+);
+CREATE TABLE NHANVIEN
+(
+	Ma_NV		varchar(10) PRIMARY KEY CLUSTERED NOT NULL,
+	Sdt			varchar(8) NOT NULL,
+	Ten			varchar(30) NOT NULL,
+	Ngay_sinh	DATE, 
+	Gioi_tinh	VARCHAR(10) NOT NULL,
+	Loai		VARCHAR(10) NOT NULL,
+	Ma_NV_quan_ly VARCHAR(10) 
+);
+
+CREATE TABLE BAOHANH
+(
+	IMEI VARCHAR(10) NOT NULL   ,
+	Serial	VARCHAR(10) NOT NULL,
+	Ma_NV_ky_thuat  varchar(10) NOT NULL ,
+	PRIMARY KEY	(IMEI, Serial, Ma_NV_ky_thuat)
+);
+
+CREATE TABLE PHIEUBAOHANH
+(
+	Ma_BH			varchar(10) PRIMARY KEY CLUSTERED,
+	Thoi_han_BH		int  NOT NULL,
+	Ngay_BD			DATE NOT NULL,
+	IMEI			varchar(10) NOT NULL,
+	Serial			varchar(10) NOT NULL,
+	Loai_BH		varchar(20)
+);
+
+ALTER TABLE CUAHANG
+	ADD CONSTRAINT	fk_cuahang_tenTCS	FOREIGN KEY (Ten_TSC) 
+				REFERENCES TRUSOCHINH(Ten_TSC),
+	CONSTRAINT		fk_cuahang_NVQL		FOREIGN KEY (Ma_NV_quan_ly) 
+				REFERENCES NHANVIEN(Ma_NV);
+ALTER TABLE HOADON
+	ADD CONSTRAINT	fk_hoadon_ma_KH		FOREIGN KEY (Ma_KH)
+				REFERENCES KHACHHANG(Ma_KH),
+	CONSTRAINT		fk_hoadon_NVBH			FOREIGN KEY (Ma_NV_ban_hang) 
+				REFERENCES NHANVIEN(Ma_NV);
+ALTER TABLE PHIEUKHO
+	ADD CONSTRAINT	fk_phieukho_IMEI	FOREIGN KEY (IMEI,Serial)
+				REFERENCES SANPHAM(IMEI,Serial),
+	CONSTRAINT		fk_phieukho_Ma_kho	FOREIGN KEY (Ma_Kho) 
+				REFERENCES KHO(Ma_Kho),
+	CONSTRAINT		fk_phieukho_Ma_NVTK	FOREIGN KEY (Ma_NV_thu_kho) 
+				REFERENCES NHANVIEN(Ma_NV),
+	CONSTRAINT		fk_phieukho_Ma_NVBH	FOREIGN KEY (Ma_NV_ban_hang) 
+				REFERENCES NHANVIEN(Ma_NV),
+	CONSTRAINT		fk_phieukho_Ma_NCC	FOREIGN KEY (Ma_NCC) 
+				REFERENCES NHACUNGCAP(Ma_NCC);
+ALTER TABLE NHANVIEN
+	ADD CONSTRAINT	fk_nhanvien_NVQL	FOREIGN KEY (Ma_NV_quan_ly) 
+				REFERENCES NHANVIEN(Ma_NV);
+ALTER TABLE PHIEUBAOHANH
+	ADD CONSTRAINT	fk_phieubaohanh_Serial_IMEI	FOREIGN KEY (IMEI,Serial)
+				REFERENCES	SANPHAM (IMEI,Serial);
+ALTER TABLE SANPHAM
+	ADD CONSTRAINT	fk_sanpham_Serial	FOREIGN KEY (Serial)
+				REFERENCES	MATHANG(Serial);
+ALTER TABLE BAN
+	ADD CONSTRAINT	fk_ban_Ma_CH		FOREIGN KEY (Ma_CH)
+				REFERENCES	CUAHANG (Ma_CH),
+	CONSTRAINT		fk_ban_Serial		FOREIGN KEY (Serial)
+				REFERENCES  MATHANG (Serial);
+
+ALTER TABLE BAOHANH
+	ADD CONSTRAINT	fk_baohanh_IMEI_Serial	FOREIGN KEY (IMEI,Serial)
+				REFERENCES	SANPHAM (IMEI,Serial),
+	CONSTRAINT		fk_baohanh_Ma_MVKT		FOREIGN KEY (Ma_NV_ky_thuat)
+				REFERENCES  NHANVIEN (Ma_NV);
+ALTER TABLE YEUCAUTRONG
+	ADD CONSTRAINT	fk_yeucautrong_IMEI_Serial	FOREIGN KEY (IMEI,Serial)
+				REFERENCES	SANPHAM (IMEI,Serial),
+	CONSTRAINT		fk_yeucautrong_Ma_HD		FOREIGN KEY (Ma_HD)
+				REFERENCES	HOADON(MA_HD);
+ALTER TABLE TICHDIEM
+	ADD CONSTRAINT	fk_tichdiem_ma_KH			FOREIGN KEY (Ma_KH)
+				REFERENCES	KHACHHANG(Ma_KH),
+	CONSTRAINT		fk_tichdiem_Ma_HD		FOREIGN KEY (Ma_HD)
+				REFERENCES	HOADON(MA_HD);
